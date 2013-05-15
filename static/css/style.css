@@ -1,0 +1,20 @@
+.catalog-result i {
+  color:#999;
+}
+
+.catalog-result a {
+  display:block;
+  height:45px;
+  overflow:hidden;
+  padding-right:5px;
+}
+
+#image {
+  height:150px;
+  overflow:hidden;
+}
+
+.image-result a {
+  display:block;
+  margin-right:10px;
+}

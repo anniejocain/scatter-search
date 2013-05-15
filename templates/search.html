@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scatter Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+    <link href="{{ url_for('static', filename='css/font-awesome.min.css') }}" rel="stylesheet" media="screen">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" media="screen">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <style type="text/css">
+      body {
+        padding-top: 25px;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="container">
+      <div class="row">
+        <div class="span4">
+          <h2>Scatter Search!</h2>
+          <form id="cross-search" class="form-inline" action="http://hlsl7.law.harvard.edu/dev/annie/scatter/search.html" method="get">
+            <input id="query" name="q" type="text" class="input-medium">
+            <button type="submit" class="btn">Search</button>
+          </form>
+        </div>
+        <div class="span8">
+          <div id="image"></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span3">
+          <h4>Primo</h4>
+              <div class="alert alert-info">
+                Wouldn't this be nice!
+              </div>
+        </div>
+        <div id="catalog" class="span3 offset1">
+        </div>
+        <div id="libguides" class="span3 offset1">
+        </div>
+      </div>
+      <div class="row">
+        <div id="databases" class="span3">
+        </div>
+        <div id="journals" class="span3 offset1">
+        </div>
+        <div id="website" class="span3 offset1">
+        </div>
+      </div>
+    </div>
+    
+    <script src="http://code.jquery.com/jquery.js"></script>
+    <script src="{{ url_for('static', filename='js/handlebars.js') }}"></script>
+    <script>
+    var query = '{{term}}',
+    type = '{{type}}',
+    web_base = '{{web_base}}';
+    </script>
+    <script src="{{ url_for('static', filename='js/scatter.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script id="catalog-template" type="text/x-handlebars-template">
+      <h4>HOLLIS</h4>
+      {% raw %}
+      {{#results}}
+      <div class="catalog-result">
+        <h5><i class="{{format}} icon-large pull-right"></i> <a href="{{link}}">{{title}}</a></h5>
+      </div>
+      {{/results}}
+      {{#if alert}}
+      <div class="alert">
+    		{{alert}}
+    	</div>
+    	{{/if}}      
+    </script>
+    <script id="libguides-template" type="text/x-handlebars-template">
+      <h4>Research guides</h4>
+      {{#guides}}
+        <h5><a href="{{page-link}}">{{page-title}}</a> <small>in {{title}}</h5>
+      {{/guides}}
+      {{#if alert}}
+      <div class="alert">
+    		{{alert}}
+    	</div>
+    	{{/if}}
+    </script>
+    <script id="journals-template" type="text/x-handlebars-template">
+      <h4>Journals</h4>
+      {{#journals}}
+      <div class="journals-result">
+        <h5><a href="{{link}}">{{title}}</a></h5>
+      </div>
+      {{/journals}}
+      {{#if alert}}
+      <div class="alert">
+    		{{alert}}
+    	</div>
+    	{{/if}}
+    </script>
+    <script id="databases-template" type="text/x-handlebars-template">
+      <h4>Databases</h4>
+      {{#databases}}
+      <div class="databases-result">
+        <h5><a href="{{link}}">{{title}}</a></h5>
+      </div>
+      {{/databases}}
+      {{#if alert}}
+      <div class="alert">
+    		{{alert}}
+    	</div>
+    	{{/if}}
+    </script>
+    <script id="website-template" type="text/x-handlebars-template">
+      <h4>Library website</h4>
+      {{#results}}
+      <div class="website-result">
+        <h5><a href="{{link}}">{{{title}}}</a></h5>
+      </div>
+      {{/results}}
+      {{#if alert}}
+      <div class="alert">
+    		{{alert}}
+    	</div>
+    	{{/if}}
+    </script>
+    <script id="image-template" type="text/x-handlebars-template">
+      <h4>Images</h4>
+      {{#results}}
+      <div class="image-result">
+        <a href="{{link}}" class="pull-left"><img src="{{thumbnail}}"></a>
+      </div>
+      {{/results}}
+      {{#if alert}}
+      <div class="alert">
+    		{{alert}}
+    	</div>
+    	{{/if}}
+    	{% endraw %}
+    </script>
+  </body>
+</html>
