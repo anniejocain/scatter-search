@@ -1,9 +1,11 @@
-import urllib2, json
+import urllib2, json, logging
 from flask import Flask, render_template, jsonify
 from lxml.html import parse
 
 config = {}
-execfile('etc/scatter.conf', config) 
+execfile('/var/www/html/dev/annie/flask/etc/scatter.conf', config) 
+
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -57,7 +59,7 @@ def api_journals(term=None):
 @app.route('/api/libguides/<term>')
 def api_libguides(term=None):
   
-  doc = parse('http://libguides.law.harvard.edu/search_process.php?search=' + term + '&gid=&iid=1242&pid=&c=0&search_field=&display_mode=').getroot()
+  doc = parse('http://guides.library.harvard.edu/search_process.php?search=' + term + '&gid=&iid=1242&pid=&c=0&search_field=&display_mode=').getroot()
   list = []
   for guide in doc.cssselect('.search_item_result')[0:5]:
     title = guide.getchildren()[0].getchildren()[0].getchildren()[0].text_content()
@@ -235,7 +237,10 @@ def api_via(term=None):
     
     link = result['catalogUrl']
     link = link.replace('http://hollis.harvard.edu/accessible.ashx?itemid=', 'http://hollis.harvard.edu/?itemid=')
-    thumbnail = result['thumbnail']
+    thumbnail = result.get('thumbnail')
+    if not thumbnail:
+      thumbnail = ''
+    #thumbnail = result['thumbnail']
     response_object = {"link": link, "thumbnail": thumbnail, "title": title}
     results_list.append(response_object)
     

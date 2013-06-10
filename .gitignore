@@ -1,2 +1,3 @@
 etc/scatter.conf
 *.pyc
+*.wsgi
