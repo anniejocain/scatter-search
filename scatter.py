@@ -121,7 +121,7 @@ def api_website(term=None):
 def api_hollis(term=None):
   
   #url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"'
-  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&resource=images&jsonp='
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&limit=5&jsonp='
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -185,7 +185,7 @@ def api_hollis(term=None):
 @app.route('/api/via/<term>')
 def api_via(term=None):
   
-  url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"+format:matPhoto'
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&resource=images&limit=5&jsonp='
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -219,14 +219,19 @@ def api_via(term=None):
   results = jsoned_response['results']['resultSet']['item']
   
   for result in results[0:5]:
-    title = result.get('dc:title')
-    
-    link = result['catalogUrl']
-    link = link.replace('http://hollis.harvard.edu/accessible.ashx?itemid=', 'http://hollis.harvard.edu/?itemid=')
-    thumbnail = result.get('thumbnail')
-    if not thumbnail:
-      thumbnail = ''
-    #thumbnail = result['thumbnail']
+    titles = result.get('dc:title')
+    if isinstance(titles, list):
+        title = titles[0]
+    else:
+        title = titles
+    link = result.get('cataloglink')
+    thumbnail = ''
+    links = result['links']
+    thumbnails = links.get('a')
+    if thumbnails:
+        for content in thumbnails:
+            if content['content'] == 'thumbnail':
+                thumbnail = content['href']
     response_object = {"link": link, "thumbnail": thumbnail, "title": title}
     results_list.append(response_object)
     
