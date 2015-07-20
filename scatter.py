@@ -1,15 +1,17 @@
-import urllib2, json
+import urllib2, json, logging
 from flask import Flask, render_template, jsonify
 from lxml.html import parse
 
 config = {}
-execfile('etc/scatter.conf', config) 
+execfile('/var/www/html/scatter/etc/scatter.conf', config) 
+
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-  return render_template('index.html')
+  return render_template('index.html', web_base=config['WEB_BASE'])
 
 @app.route('/hello/')
 @app.route('/hello/<name>')
@@ -24,12 +26,11 @@ def search(term=None, type=None):
 @app.route('/api/databases/<term>')
 def api_databases(term=None):
   
-  doc = parse('http://eresearch.lib.harvard.edu/V/?func=find-db-1-locate&format=000&F-WRD=' + term).getroot()
-  #link = doc.cssselect('tr.find_db_table_view td.db_link_bold a')
+  doc = parse('http://law.harvard.edu/apps/library/admin/proxy.php?url=http%3A%2F%2Feresearch.lib.harvard.edu%2FV%2F%3Ffunc%3Dfind-db-1-locate%26format%3D000%26F-WRD%3D' + term).getroot()
   list = []
   for link in doc.cssselect('tr.find_db_table_view td.db_link_bold a')[0:5]:
     type = link.getparent().getnext().text_content()
-    response_object = {"link": link.get('href'), "type": type, "title": link.text_content()}
+    response_object = {"link": link.get('href'), "type": type.strip(), "title": link.text_content()}
     list.append(response_object)
     
   response = jsonify(databases = list)
@@ -118,7 +119,8 @@ def api_website(term=None):
 @app.route('/api/hollis/<term>')
 def api_hollis(term=None):
   
-  url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"'
+  #url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"'
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&jsonp='
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -153,27 +155,8 @@ def api_hollis(term=None):
   
   for result in results[0:5]:
     title = result.get('dc:title')
-    if not title:
-      title = result['mods']['titleInfo']
-    if isinstance(title, list):
-      title = result['mods']['titleInfo'][0]['title']
-      if 'nonSort' in result['mods']['titleInfo'][0]:
-        nonsort = result['mods']['titleInfo'][0]['nonSort']
-        title = nonsort + ' ' + title
-      if 'subTitle' in result['mods']['titleInfo'][0]:
-        subtitle = result['mods']['titleInfo'][0]['subTitle']
-        title = title + ' ' + subtitle
-    else:
-      title = result['mods']['titleInfo']['title']
-      if 'nonSort' in result['mods']['titleInfo']:
-        nonsort = result['mods']['titleInfo']['nonSort']
-        title = nonsort + ' ' + title
-      if 'subTitle' in result['mods']['titleInfo']:
-        subtitle = result['mods']['titleInfo']['subTitle']
-        title = title + ': ' + subtitle
-    link = result['catalogUrl']
-    link = link.replace('http://hollis.harvard.edu/accessible.ashx?itemid=', 'http://hollis.harvard.edu/?itemid=')
-    format = result['dc:format']
+    link = result.get('cataloglink')
+    format = result.get('dc:format')
     format_icon = 'icon-book'
     if format == "Book":
       format_icon = 'icon-book'
@@ -235,7 +218,10 @@ def api_via(term=None):
     
     link = result['catalogUrl']
     link = link.replace('http://hollis.harvard.edu/accessible.ashx?itemid=', 'http://hollis.harvard.edu/?itemid=')
-    thumbnail = result['thumbnail']
+    thumbnail = result.get('thumbnail')
+    if not thumbnail:
+      thumbnail = ''
+    #thumbnail = result['thumbnail']
     response_object = {"link": link, "thumbnail": thumbnail, "title": title}
     results_list.append(response_object)
     

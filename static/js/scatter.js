@@ -16,6 +16,7 @@ $(document).ready(function() {
 
 function getResults(){
   var query = $("#query").val();
+  query = query.replace(' ', '+');
 	$.getJSON(web_base + "/api/hollis/" + query, function(data) {
     if(data.results.length > 0) {
     	var source = $("#catalog-template").html();

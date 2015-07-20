@@ -1,4 +1,10 @@
 $(function() {
+  $('#cross-search').submit(function() {
+    var query = $("#query").val();
+    query = query.replace(' ', '+');
+		window.location = web_base + '/search/' + query;
+		return false;
+	});
 	var canvas = $("#c");
 	var canvasHeight;
 	var canvasWidth;
