@@ -121,7 +121,7 @@ def api_website(term=None):
 def api_hollis(term=None):
   
   #url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"'
-  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&jsonp='
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&resource=images&jsonp='
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -161,17 +161,17 @@ def api_hollis(term=None):
     else:
         title = titles
     link = result.get('cataloglink')
-    format = result.get('dc:format')
+    format = result.get('dc:type')
     format_icon = 'icon-book'
-    if format == "Book":
+    if format == "book":
       format_icon = 'icon-book'
-    elif format == "Journal / Serial":
+    elif format == "journal":
       format_icon = 'icon-bookmark'
-    elif format == "Movie":
+    elif format == "video":
       format_icon = 'icon-film'
-    elif format == "Recording":
+    elif format == "sound_recording":
       format_icon = 'icon-music'
-    elif format == "Image":
+    elif format == "image":
       format_icon = 'icon-picture'
     response_object = {"link": link, "format": format_icon, "title": title}
     results_list.append(response_object)
