@@ -3,6 +3,7 @@ from flask import Flask, render_template, jsonify
 from lxml.html import parse
 
 config = {}
+
 execfile('/var/www/html/scatter/etc/scatter.conf', config) 
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,7 @@ def api_journals(term=None):
 @app.route('/api/libguides/<term>')
 def api_libguides(term=None):
   
-  doc = parse('http://libguides.law.harvard.edu/search_process.php?search=' + term + '&gid=&iid=1242&pid=&c=0&search_field=&display_mode=').getroot()
+  doc = parse('http://guides.library.harvard.edu/search_process.php?search=' + term + '&gid=&iid=1242&pid=&c=0&search_field=&display_mode=').getroot()
   list = []
   for guide in doc.cssselect('.search_item_result')[0:5]:
     title = guide.getchildren()[0].getchildren()[0].getchildren()[0].text_content()
@@ -154,7 +155,11 @@ def api_hollis(term=None):
   results = jsoned_response['results']['resultSet']['item']
   
   for result in results[0:5]:
-    title = result.get('dc:title')
+    titles = result.get('dc:title')
+    if isinstance(titles, list):
+        title = titles[0]
+    else:
+        title = titles
     link = result.get('cataloglink')
     format = result.get('dc:format')
     format_icon = 'icon-book'
