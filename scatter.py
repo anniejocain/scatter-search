@@ -120,8 +120,10 @@ def api_website(term=None):
 @app.route('/api/hollis/<term>')
 def api_hollis(term=None):
   
+  term = term.replace(' ', '+')
+  
   #url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"'
-  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&limit=5&jsonp='
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"'
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -185,7 +187,9 @@ def api_hollis(term=None):
 @app.route('/api/via/<term>')
 def api_via(term=None):
   
-  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&resource=images&limit=5&jsonp='
+  term = term.replace(' ', '+')
+  
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&query=rtype,exact,image&limit=5'
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
