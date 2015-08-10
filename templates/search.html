@@ -76,9 +76,9 @@
     </script>
     <script id="libguides-template" type="text/x-handlebars-template">
       <h4>Research guides</h4>
-      {{#guides}}
-        <h5><a href="{{page-link}}">{{page-title}}</a> <small>in {{title}}</h5>
-      {{/guides}}
+      {{#results}}
+        <h5><a href="{{link}}">{{title}}</a></h5>
+      {{/results}}
       {{#if alert}}
       <div class="alert">
     		{{alert}}

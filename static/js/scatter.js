@@ -30,7 +30,7 @@ function getResults(){
     }
   });
   $.getJSON(web_base + "/api/libguides/" + query, function(data) {
-    if(data.guides.length > 0) {
+    if(data.results.length > 0) {
     	var source = $("#libguides-template").html();
     	var template = Handlebars.compile(source);
     	$('#libguides').html(template(data));

@@ -59,20 +59,80 @@ def api_journals(term=None):
 @app.route('/api/libguides/<term>')
 def api_libguides(term=None):
   
-  doc = parse('http://guides.library.harvard.edu/search_process.php?search=' + term + '&gid=&iid=1242&pid=&c=0&search_field=&display_mode=').getroot()
+  url = 'https://www.googleapis.com/customsearch/v1?key=' + config['GOOGLE_API'] +  '&cx=' + config['GOOGLE_CUSTOM'] + '&q=' + term
+    
+  req = urllib2.Request(url)
+  req.add_header("accept", "application/json")
+    
+  response = None
+    
+  try: 
+    f = urllib2.urlopen(req)
+    response = f.read()
+    f.close()
+  except urllib2.HTTPError, e:
+    logger.warn('Item from Hollis, HTTPError = ' + str(e.code))
+  except urllib2.URLError, e:
+    logger.warn('Item from Hollis, URLError = ' + str(e.reason))
+  except httplib.HTTPException, e:
+    logger.warn('Item from Hollis, HTTPException')
+  except Exception:
+    import traceback
+    logger.warn('Item from Hollis, generic exception: ' + traceback.format_exc())
+    
   list = []
-  for guide in doc.cssselect('.search_item_result')[0:5]:
-    title = guide.getchildren()[0].getchildren()[0].getchildren()[0].text_content()
-    link = guide.getchildren()[0].getchildren()[0].getchildren()[0].get('href')
-    description = guide.getchildren()[0].getchildren()[0].getnext().getnext()
-    if description is not None:
-      description = description.text_content()
-    page_title = guide.getchildren()[0].getnext().getnext().getchildren()[0].getchildren()[0].getchildren()[0].text_content()
-    page_link = guide.getchildren()[0].getnext().getnext().getchildren()[0].getchildren()[0].getchildren()[0].get('href')
-    response_object = {"title": title, "link": link, "description": description, "page-title": page_title, "page-link": page_link}
+  jsoned_response = json.loads(response)
+    
+  results = jsoned_response['items']
+  
+  for result in results[0:5]:
+    title_parts = result['title'].split(' - Research Guides')
+    title = title_parts[0]
+    response_object = {"title": title, "link": result['link']}
     list.append(response_object)
     
-  response = jsonify(guides = list)
+  response = jsonify(results = list)
+  response.headers['Content-Type'] = "application/json"
+  response.status_code = 201
+    
+  return response
+  
+@app.route('/api/law-libguides/<term>')
+def api_law_libguides(term=None):
+  
+  url = 'https://www.googleapis.com/customsearch/v1?key=' + config['GOOGLE_API'] +  '&cx=' + config['GOOGLE_LAW_CUSTOM'] + '&q=' + term
+    
+  req = urllib2.Request(url)
+  req.add_header("accept", "application/json")
+    
+  response = None
+    
+  try: 
+    f = urllib2.urlopen(req)
+    response = f.read()
+    f.close()
+  except urllib2.HTTPError, e:
+    logger.warn('Item from Hollis, HTTPError = ' + str(e.code))
+  except urllib2.URLError, e:
+    logger.warn('Item from Hollis, URLError = ' + str(e.reason))
+  except httplib.HTTPException, e:
+    logger.warn('Item from Hollis, HTTPException')
+  except Exception:
+    import traceback
+    logger.warn('Item from Hollis, generic exception: ' + traceback.format_exc())
+    
+  list = []
+  jsoned_response = json.loads(response)
+    
+  results = jsoned_response['items']
+  
+  for result in results[0:5]:
+    title_parts = result['title'].split(' - Research Guides')
+    title = title_parts[0]
+    response_object = {"title": title, "link": result['link']}
+    list.append(response_object)
+    
+  response = jsonify(results = list)
   response.headers['Content-Type'] = "application/json"
   response.status_code = 201
     
@@ -81,7 +141,7 @@ def api_libguides(term=None):
 @app.route('/api/website/<term>')
 def api_website(term=None):
   
-  url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=site:http://library.harvard.edu%20' + term
+  url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=site:http://library.harvard.edu%20-site:http://guides.library.harvard.edu%20' + term
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -116,7 +176,46 @@ def api_website(term=None):
   response.status_code = 201
     
   return response
+ 
+@app.route('/api/law-website/<term>')
+def api_law_website(term=None):
   
+  url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=site:http://law.harvard.edu/library%20' + term
+    
+  req = urllib2.Request(url)
+  req.add_header("accept", "application/json")
+    
+  response = None
+    
+  try: 
+    f = urllib2.urlopen(req)
+    response = f.read()
+    f.close()
+  except urllib2.HTTPError, e:
+    logger.warn('Item from Hollis, HTTPError = ' + str(e.code))
+  except urllib2.URLError, e:
+    logger.warn('Item from Hollis, URLError = ' + str(e.reason))
+  except httplib.HTTPException, e:
+    logger.warn('Item from Hollis, HTTPException')
+  except Exception:
+    import traceback
+    logger.warn('Item from Hollis, generic exception: ' + traceback.format_exc())
+    
+  list = []
+  jsoned_response = json.loads(response)
+    
+  results = jsoned_response['responseData']['results']
+  
+  for result in results[0:5]:
+    response_object = {"title": result['title'], "link": result['url']}
+    list.append(response_object)
+    
+  response = jsonify(results = list)
+  response.headers['Content-Type'] = "application/json"
+  response.status_code = 201
+    
+  return response
+   
 @app.route('/api/hollis/<term>')
 def api_hollis(term=None):
   
@@ -189,7 +288,7 @@ def api_via(term=None):
   
   term = term.replace(' ', '+')
   
-  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&query=rtype,exact,image&limit=5'
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"&query=rtype,exact,image'
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
