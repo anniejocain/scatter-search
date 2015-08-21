@@ -317,7 +317,7 @@ def api_hollis(term=None):
     response_object = {"link": link, "format": format_icon, "title": title}
     results_list.append(response_object)
     
-  response = jsonify(results = results_list)
+  response = jsonify(results = results_list, totalResults = jsoned_response['results']['totalResults'])
   response.headers['Content-Type'] = "application/json"
   response.status_code = 201
     
