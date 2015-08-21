@@ -1,5 +1,6 @@
 import urllib2, json, logging
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template
+from flask.ext.jsonpify import jsonify
 from lxml.html import parse
 
 config = {}
@@ -51,6 +52,45 @@ def api_journals(term=None):
     list.append(response_object)
     
   response = jsonify(journals = list)
+  response.headers['Content-Type'] = "application/json"
+  response.status_code = 201
+    
+  return response
+  
+@app.route('/api/libanswers/<term>')
+def api_libanswers(term=None):
+  
+  url = 'http://api.libanswers.com/api_query.php?iid=' + config['LIBANSWERS_SITE_ID'] +  '&limit=20&format=json&q=' + term
+    
+  req = urllib2.Request(url)
+  req.add_header("accept", "application/json")
+    
+  response = None
+    
+  try: 
+    f = urllib2.urlopen(req)
+    response = f.read()
+    f.close()
+  except urllib2.HTTPError, e:
+    logger.warn('Item from Hollis, HTTPError = ' + str(e.code))
+  except urllib2.URLError, e:
+    logger.warn('Item from Hollis, URLError = ' + str(e.reason))
+  except httplib.HTTPException, e:
+    logger.warn('Item from Hollis, HTTPException')
+  except Exception:
+    import traceback
+    logger.warn('Item from Hollis, generic exception: ' + traceback.format_exc())
+    
+  list = []
+  jsoned_response = json.loads(response)
+    
+  results = jsoned_response['query']['results']
+  
+  for result in results[0:5]:
+    response_object = {"title": result['question'], "link": result['url']}
+    list.append(response_object)
+    
+  response = jsonify(results = list)
   response.headers['Content-Type'] = "application/json"
   response.status_code = 201
     
