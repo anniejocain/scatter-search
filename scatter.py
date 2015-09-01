@@ -162,7 +162,19 @@ def api_law_libguides(term=None):
     logger.warn('Item from Hollis, generic exception: ' + traceback.format_exc())
     
   list = []
+  if not response:
+  	response = jsonify(results = {})
+  	response.headers['Content-Type'] = "application/json"
+  	response.status_code = 201
+  	return response
+  
   jsoned_response = json.loads(response)
+
+  if jsoned_response['searchInformation']['totalResults'] == '0':
+  	response = jsonify(results = {})
+  	response.headers['Content-Type'] = "application/json"
+  	response.status_code = 201
+  	return response
     
   results = jsoned_response['items']
   
@@ -172,7 +184,7 @@ def api_law_libguides(term=None):
     response_object = {"title": title, "link": result['link']}
     list.append(response_object)
     
-  response = jsonify(results = list)
+  response = jsonify(results = list, totalResults = jsoned_response['searchInformation']['totalResults'])
   response.headers['Content-Type'] = "application/json"
   response.status_code = 201
     
