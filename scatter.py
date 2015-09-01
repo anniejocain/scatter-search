@@ -262,7 +262,7 @@ def api_hollis(term=None):
   term = term.replace(' ', '+')
   
   #url = 'http://webservices.lib.harvard.edu/rest/hollis/search/cite/?q="' + term + '"'
-  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q="' + term + '"'
+  url = 'http://webservices.lib.harvard.edu/rest/v2/hollisplus/search/dc/?q=' + term
     
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
@@ -294,6 +294,33 @@ def api_hollis(term=None):
     return response
     
   results = jsoned_response['results']['resultSet']['item']
+  if not isinstance(results, list):
+  	titles = results.get('dc:title')
+  	if isinstance(titles, list):
+  		title = titles[0]
+  	else:
+  		title = titles
+  	link = results.get('cataloglink')
+  	format = results.get('dc:type')
+  	format_icon = 'icon-book'
+  	if format == "book":
+  		format_icon = 'icon-book'
+  	elif format == "journal":
+  		format_icon = 'icon-bookmark'
+  	elif format == "video":
+  		format_icon = 'icon-film'
+  	elif format == "sound_recording":
+  		format_icon = 'icon-music'
+  	elif format == "image":
+  		format_icon = 'icon-picture'
+  	response_object = {"link": link, "format": format_icon, "title": title}
+  	results_list.append(response_object)
+    
+  	response = jsonify(results = results_list, totalResults = jsoned_response['results']['totalResults'])
+  	response.headers['Content-Type'] = "application/json"
+  	response.status_code = 201
+    
+  	return response
   
   for result in results[0:5]:
     titles = result.get('dc:title')
