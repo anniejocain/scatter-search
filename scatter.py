@@ -61,7 +61,7 @@ def api_journals(term=None):
 def api_libanswers(term=None):
   
   url = 'http://api.libanswers.com/api_query.php?iid=' + config['LIBANSWERS_SITE_ID'] +  '&limit=20&format=json&q=' + term
-    
+
   req = urllib2.Request(url)
   req.add_header("accept", "application/json")
     
@@ -90,7 +90,7 @@ def api_libanswers(term=None):
     response_object = {"title": result['question'], "link": result['url']}
     list.append(response_object)
     
-  response = jsonify(results = list)
+  response = jsonify(results = list, totalResults = jsoned_response['query']['total_results'])
   response.headers['Content-Type'] = "application/json"
   response.status_code = 201
     
