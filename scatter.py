@@ -298,7 +298,7 @@ def api_hollis(term=None):
   results_list = []
   jsoned_response = json.loads(response)
   
-  if 'resultSet' not in jsoned_response['results']:
+  if 'resultSet' not in jsoned_response['results'] or jsoned_response['results']['totalResults'] == 0:
     response = jsonify(results = '')
     response.headers['Content-Type'] = "application/json"
     response.status_code = 201
