@@ -40,6 +40,45 @@ def api_databases(term=None):
   response.status_code = 201
     
   return response
+  
+@app.route('/api/law-databases/<term>')
+def api_law_databases(term=None):
+  
+  url = 'http://librarylab.law.harvard.edu/dev/annie/law-apps/api/item/search?sort=clicks%20desc&limit=6&start=0&filter[]=_all:' + term
+
+  req = urllib2.Request(url)
+  req.add_header("accept", "application/json")
+    
+  response = None
+    
+  try: 
+    f = urllib2.urlopen(req)
+    response = f.read()
+    f.close()
+  except urllib2.HTTPError, e:
+    logger.warn('Item from Hollis, HTTPError = ' + str(e.code))
+  except urllib2.URLError, e:
+    logger.warn('Item from Hollis, URLError = ' + str(e.reason))
+  except httplib.HTTPException, e:
+    logger.warn('Item from Hollis, HTTPException')
+  except Exception:
+    import traceback
+    logger.warn('Item from Hollis, generic exception: ' + traceback.format_exc())
+    
+  list = []
+  jsoned_response = json.loads(response)
+    
+  results = jsoned_response['docs']
+  
+  for result in results[0:5]:
+    response_object = {"title": result['name'], "link": result['link']}
+    list.append(response_object)
+    
+  response = jsonify(results = list, totalResults = jsoned_response['num_found'])
+  response.headers['Content-Type'] = "application/json"
+  response.status_code = 201
+    
+  return response
 
 @app.route('/api/journals/<term>')
 def api_journals(term=None):
